@@ -58,6 +58,8 @@ pipeline {
                             docker build hasher-matcher-actioner/ \
                                 -t ${IMAGE_NAME}:${IMAGE_TAG} \
                                 -f hasher-matcher-actioner/Dockerfile
+
+                            docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
                         """
                     }
                 }
