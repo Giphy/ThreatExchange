@@ -7,6 +7,8 @@ import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     from threatexchange.signal_type.pdq import signal as _
+    from threatexchange.signal_type.pdq.signal import PdqSignal
+    from threatexchange.signal_type.md5 import VideoMD5Signal
 ## Resume regularly scheduled imports
 
 import logging
@@ -67,6 +69,35 @@ def create_app() -> flask.Flask:
 
     if "OMM_CONFIG" in os.environ:
         app.config.from_envvar("OMM_CONFIG")
+    elif "ENV_CONFIG" in os.environ:
+        PRODUCTION = os.environ.get("PRODUCTION", "false") == "true"
+        DBUSER = os.environ.get("POSTGRES_USER", "media_match")
+        DBPASS = os.environ.get("POSTGRES_PASSWORD", "hunter2")
+        DBHOST = os.environ.get("POSTGRESS_HOST", "db")
+        DBNAME = os.environ.get("POSTGRESS_DBNAME", "media_match")
+        DATABASE_URI = f"postgresql+psycopg2://{DBUSER}:{DBPASS}@{DBHOST}/{DBNAME}"
+
+        # Role configuration
+        ROLE_HASHER = os.environ.get("ROLE_HASHER", "false") == "true"
+        ROLE_MATCHER = os.environ.get("ROLE_MATCHER", "false") == "true"
+        ROLE_CURATOR = os.environ.get("ROLE_CURATOR", "false") == "true"
+
+        # Installed SignalTypes
+        SIGNAL_TYPES = [PdqSignal, VideoMD5Signal]
+
+        # Update the app config
+        app.config.update(
+            PRODUCTION=PRODUCTION,
+            DBUSER=DBUSER,
+            DBPASS=DBPASS,
+            DBHOST=DBHOST,
+            DBNAME=DBNAME,
+            DATABASE_URI=DATABASE_URI,
+            ROLE_HASHER=ROLE_HASHER,
+            ROLE_MATCHER=ROLE_MATCHER,
+            ROLE_CURATOR=ROLE_CURATOR,
+            SIGNAL_TYPES=SIGNAL_TYPES
+        )
     elif sys.argv[0].endswith("/flask"):  # Default for flask CLI
         # The devcontainer settings. If you are using the CLI outside
         # the devcontainer and getting an error, just override the env

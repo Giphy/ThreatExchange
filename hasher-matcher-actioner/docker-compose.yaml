@@ -14,8 +14,12 @@ services:
     ports:
       - 8080:8080
     environment:
+      ENV_CONFIG: "true"
+      PRODUCTION: "false"
+      ROLE_HASHER: "true"
+      ROLE_MATCHER: "true"
+      ROLE_CURATOR: "true"
       <<: *postgres-variables
-      OMM_CONFIG: /build/omm_config.py
     networks:
       - backend
     depends_on:
