@@ -85,6 +85,9 @@ def create_app() -> flask.Flask:
         # Installed SignalTypes
         SIGNAL_TYPES = [PdqSignal, VideoMD5Signal]
 
+        # Background tasks
+        TASK_INDEXER = os.environ.get("TASK_INDEXER", "false") == "true"
+
         # Update the app config
         app.config.update(
             PRODUCTION=PRODUCTION,
@@ -96,7 +99,8 @@ def create_app() -> flask.Flask:
             ROLE_HASHER=ROLE_HASHER,
             ROLE_MATCHER=ROLE_MATCHER,
             ROLE_CURATOR=ROLE_CURATOR,
-            SIGNAL_TYPES=SIGNAL_TYPES
+            SIGNAL_TYPES=SIGNAL_TYPES,
+            TASK_INDEXER=TASK_INDEXER
         )
     elif sys.argv[0].endswith("/flask"):  # Default for flask CLI
         # The devcontainer settings. If you are using the CLI outside
@@ -128,7 +132,7 @@ def create_app() -> flask.Flask:
     with app.app_context():
         # We only run apscheduler in the "outer" reloader process, else we'll
         # have multiple executions of the the scheduler in debug mode
-        if _is_werkzeug_reloaded_process():
+        if not _is_debug_mode() or _is_werkzeug_reloaded_process():
             now = datetime.datetime.now()
             scheduler = dev_apscheduler.get_apscheduler()
             scheduler.init_app(app)

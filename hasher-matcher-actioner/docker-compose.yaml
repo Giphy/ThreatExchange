@@ -19,6 +19,7 @@ services:
       ROLE_HASHER: "true"
       ROLE_MATCHER: "true"
       ROLE_CURATOR: "true"
+      TASK_INDEXER: "true"
       <<: *postgres-variables
     networks:
       - backend
