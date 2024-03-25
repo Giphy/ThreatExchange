@@ -10,12 +10,21 @@ x-postgres-variables: &postgres-variables
 services:
   app:
     build: .
+    command: flask --app OpenMediaMatch.app --debug run --host=0.0.0.0 --port=8080
+    #command: ["gunicorn", "--bind", "0.0.0.0:8080", "OpenMediaMatch.app:create_app()", "--log-level", "debug", "-w", "4", "--preload"]
     restart: unless-stopped
     ports:
       - 8080:8080
     environment:
+      ENV_CONFIG: "true"
+      PRODUCTION: "false"
+      ROLE_HASHER: "true"
+      ROLE_MATCHER: "true"
+      ROLE_CURATOR: "true"
+      TASK_INDEXER: "true"
       <<: *postgres-variables
-      OMM_CONFIG: /build/omm_config.py
+    volumes:
+      - ./src:/build
     networks:
       - backend
     depends_on:
