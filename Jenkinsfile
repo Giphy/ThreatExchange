@@ -66,6 +66,18 @@ pipeline {
             }
         }
 
+        stage('Test') {
+            steps {
+                script {
+                    docker.withRegistry("${ECR}", "${ECR_ARN}") {
+                        sh """
+                            docker run -it ${IMAGE_NAME}:${IMAGE_TAG} /bin/bash -c 'pip install pytest && pytest'
+                        """
+                    }
+                }
+            }
+        }
+
         stage('Publish Containers') {
             steps {
                 script {
