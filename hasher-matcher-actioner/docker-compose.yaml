@@ -16,7 +16,7 @@ services:
     ports:
       - 8080:8080
     environment:
-      ENV_CONFIG: "true"
+      OMM_CONFIG: /build/omm_config.py
       PRODUCTION: "false"
       ROLE_HASHER: "true"
       ROLE_MATCHER: "true"
@@ -24,7 +24,7 @@ services:
       TASK_INDEXER: "true"
       <<: *postgres-variables
     volumes:
-      - ./src:/build
+      - ./src/OpenMediaMatch:/build/OpenMediaMatch
     networks:
       - backend
     depends_on:
