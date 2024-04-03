@@ -71,7 +71,7 @@ pipeline {
                 script {
                     docker.withRegistry("${ECR}", "${ECR_ARN}") {
                         sh """
-                            docker run -it ${IMAGE_NAME}:${IMAGE_TAG} /bin/bash -c 'pip install pytest && pytest'
+                            docker run ${IMAGE_NAME}:${IMAGE_TAG} /bin/bash -c 'pip install pytest && pytest'
                         """
                     }
                 }
