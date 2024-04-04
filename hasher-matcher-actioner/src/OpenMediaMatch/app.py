@@ -7,8 +7,6 @@ import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     from threatexchange.signal_type.pdq import signal as _
-    from threatexchange.signal_type.pdq.signal import PdqSignal
-    from threatexchange.signal_type.md5 import VideoMD5Signal
 ## Resume regularly scheduled imports
 
 
@@ -50,6 +48,10 @@ def _is_debug_mode():
 def _is_werkzeug_reloaded_process():
     """If in debug mode, are we in the reloaded process?"""
     return os.environ.get("WERKZEUG_RUN_MAIN") == "true"
+
+
+def _is_gunicorn():
+    return "gunicorn" in os.environ.get("SERVER_SOFTWARE", "")
 
 
 def _setup_task_logging(app_logger: logging.Logger):
@@ -97,6 +99,16 @@ def create_app() -> flask.Flask:
     _setup_task_logging(app.logger)
 
     scheduler: APScheduler | None = None
+
+    if _is_gunicorn() and (
+        app.config.get("ROLE_HASHER", False)
+        or app.config.get("ROLE_MATCHER", False)
+        or app.config.get("ROLE_CURATOR", False)
+    ) and (
+        app.config.get("TASK_INDEXER", False)
+        or app.config.get("TASK_FETCHER", False)
+    ):
+        raise RuntimeError("Cannot run Indexer or Fetcher tasks in gunicorn ROLE worker - must be run in separate deployments")
 
     with app.app_context():
         # We only run apscheduler in the "outer" reloader process, else we'll

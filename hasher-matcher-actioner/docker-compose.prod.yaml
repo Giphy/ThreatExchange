@@ -1,0 +1,71 @@
+version: "3"
+
+x-postgres-variables: &postgres-variables
+  POSTGRES_USER: media_match
+  # TODO: Use a secret instead.
+  POSTGRES_PASSWORD: hunter2
+  POSTGRESS_HOST: db
+  POSTGRESS_DBNAME: media_match
+
+services:
+  indexer:
+    build: .
+    command: ["gunicorn", "--bind", "0.0.0.0:8080", "OpenMediaMatch.app:create_app()", "--log-level", "debug", "-w", "1"]
+    restart: unless-stopped
+    ports:
+      - 8081:8080
+    environment:
+      OMM_CONFIG: /build/omm_config.py
+      PRODUCTION: "true"
+      ROLE_HASHER: "false"
+      ROLE_MATCHER: "false"
+      ROLE_CURATOR: "false"
+      TASK_INDEXER: "true"
+      <<: *postgres-variables
+    volumes:
+      - ./src/OpenMediaMatch:/build/OpenMediaMatch
+    networks:
+      - backend
+    depends_on:
+      - db
+
+  app:
+    build: .
+    command: ["gunicorn", "--bind", "0.0.0.0:8080", "OpenMediaMatch.app:create_app()", "--log-level", "debug", "-w", "4"]
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    environment:
+      OMM_CONFIG: /build/omm_config.py
+      PRODUCTION: "false"
+      ROLE_HASHER: "true"
+      ROLE_MATCHER: "true"
+      ROLE_CURATOR: "true"
+      TASK_INDEXER: "false"
+      TASK_INDEX_CACHE: "true"
+      <<: *postgres-variables
+    volumes:
+      - ./src/OpenMediaMatch:/build/OpenMediaMatch
+    networks:
+      - backend
+    depends_on:
+      - db
+
+  db:
+    image: postgres:latest
+    restart: unless-stopped
+    volumes:
+        - ./.devcontainer/pg-scripts/init-multiple-pg-dbs.sh:/docker-entrypoint-initdb.d/init-multiple-pg-dbs.sh
+        - postgres-data:/var/lib/postgresql/data
+    environment:
+      <<: *postgres-variables
+      POSTGRES_MULTIPLE_DATABASES: media_match
+    networks:
+      - backend
+
+volumes:
+  postgres-data:
+
+networks:
+  backend:
+    driver: bridge

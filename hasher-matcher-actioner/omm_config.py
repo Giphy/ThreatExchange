@@ -18,4 +18,6 @@ ROLE_CURATOR = os.environ.get("ROLE_CURATOR", "false") == "true"
 SIGNAL_TYPES = [PdqSignal, VideoMD5Signal]
 
 # Background tasks
+TASK_INDEX_CACHE = os.environ.get("TASK_INDEX_CACHE", "false") == "true"
 TASK_INDEXER = os.environ.get("TASK_INDEXER", "false") == "true"
+TASK_FETCHER = os.environ.get("TASK_FETCHER", "false") == "true"
