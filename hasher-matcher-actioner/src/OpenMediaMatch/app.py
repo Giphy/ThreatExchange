@@ -22,6 +22,8 @@ import flask
 from flask.logging import default_handler
 from flask_apscheduler import APScheduler
 
+from pythonjsonlogger import jsonlogger
+
 from threatexchange.exchanges import auth
 from threatexchange.exchanges.signal_exchange_api import TSignalExchangeAPICls
 
@@ -68,7 +70,10 @@ def create_app() -> flask.Flask:
     # We like the flask logging format, so lets have it everywhere
     root = logging.getLogger()
     if not root.handlers:
-        root.addHandler(default_handler)
+        handler = default_handler
+        formatter = jsonlogger.JsonFormatter()
+        handler.setFormatter(formatter)
+        root.addHandler(handler)
     app = flask.Flask(__name__)
 
     if "OMM_CONFIG" in os.environ:

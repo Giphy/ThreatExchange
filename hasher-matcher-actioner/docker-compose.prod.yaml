@@ -10,7 +10,7 @@ x-postgres-variables: &postgres-variables
 services:
   indexer:
     build: .
-    command: ["gunicorn", "--bind", "0.0.0.0:8080", "OpenMediaMatch.app:create_app()", "--log-level", "debug", "-w", "1"]
+    command: ["gunicorn", "--bind", "0.0.0.0:8080", "OpenMediaMatch.app:create_app()", "-c", "/build/OpenMediaMatch/gunicorn_conf.py", "--log-level", "debug", "-w", "1"]
     restart: unless-stopped
     ports:
       - 8081:8080
@@ -31,7 +31,7 @@ services:
 
   app:
     build: .
-    command: ["gunicorn", "--bind", "0.0.0.0:8080", "OpenMediaMatch.app:create_app()", "--log-level", "debug", "-w", "4"]
+    command: ["gunicorn", "--bind", "0.0.0.0:8080", "OpenMediaMatch.app:create_app()", "-c", "/build/OpenMediaMatch/gunicorn_conf.py", "--log-level", "debug", "-w", "4"]
     restart: unless-stopped
     ports:
       - 8080:8080
