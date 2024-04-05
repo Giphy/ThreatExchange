@@ -71,7 +71,7 @@ pipeline {
                 script {
                     docker.withRegistry("${ECR}", "${ECR_ARN}") {
                         sh """
-                            docker-compose -f hasher-matcher-actioner/docker-compose.yaml run app /bin/bash -c 'pip install pytest && pytest'
+                            docker-compose -f hasher-matcher-actioner/docker-compose.yaml run app /bin/bash -c 'pip install pytest python-json-logger && pytest'
                         """
                     }
                 }
