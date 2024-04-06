@@ -71,8 +71,9 @@ def create_app() -> flask.Flask:
     root = logging.getLogger()
     if not root.handlers:
         handler = default_handler
-        formatter = formatters.CustomJsonFormatter()
-        handler.setFormatter(formatter)
+        if os.environ.get("LOG_FORMAT_JSON", "false") == "true":
+            formatter = formatters.CustomJsonFormatter()
+            handler.setFormatter(formatter)
         root.addHandler(handler)
     app = flask.Flask(__name__)
 
