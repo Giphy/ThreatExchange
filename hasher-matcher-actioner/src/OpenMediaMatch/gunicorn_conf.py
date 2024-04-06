@@ -1,8 +1,8 @@
 import sys
 import logging
+import datetime
 
-from pythonjsonlogger import jsonlogger
-
+from OpenMediaMatch.utils.formatters import CustomJsonFormatter, GunicornAccessFormatter
 
 accesslog = '-'  # Send access logs to stdout
 errorlog = '-'
@@ -14,17 +14,17 @@ logconfig_dict = {
     "version": 1,
     "formatters": {
         "json_request": {
-            "()": jsonlogger.JsonFormatter,
+            "()": GunicornAccessFormatter,
         },
         "json_error": {
-            "()": jsonlogger.JsonFormatter,
+            "()": CustomJsonFormatter,
         },
     },
     "handlers": {
         "json_request": {
             "class": "logging.StreamHandler",
             "stream": sys.stdout,
-            "formatter": "json_request",
+            "formatter": "json_request"
         },
         "json_error": {
             "class": "logging.StreamHandler",

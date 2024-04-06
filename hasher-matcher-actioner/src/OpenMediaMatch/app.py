@@ -36,7 +36,7 @@ from OpenMediaMatch.background_tasks import (
 )
 from OpenMediaMatch.persistence import get_storage
 from OpenMediaMatch.blueprints import development, hashing, matching, curation, ui
-from OpenMediaMatch.utils import dev_utils
+from OpenMediaMatch.utils import dev_utils, formatters
 
 
 def _is_debug_mode():
@@ -71,7 +71,7 @@ def create_app() -> flask.Flask:
     root = logging.getLogger()
     if not root.handlers:
         handler = default_handler
-        formatter = jsonlogger.JsonFormatter()
+        formatter = formatters.CustomJsonFormatter()
         handler.setFormatter(formatter)
         root.addHandler(handler)
     app = flask.Flask(__name__)
