@@ -7,8 +7,6 @@ import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     from threatexchange.signal_type.pdq import signal as _
-    from threatexchange.signal_type.pdq.signal import PdqSignal
-    from threatexchange.signal_type.md5 import VideoMD5Signal
 ## Resume regularly scheduled imports
 
 
@@ -24,6 +22,8 @@ import flask
 from flask.logging import default_handler
 from flask_apscheduler import APScheduler
 
+from pythonjsonlogger import jsonlogger
+
 from threatexchange.exchanges import auth
 from threatexchange.exchanges.signal_exchange_api import TSignalExchangeAPICls
 
@@ -36,7 +36,7 @@ from OpenMediaMatch.background_tasks import (
 )
 from OpenMediaMatch.persistence import get_storage
 from OpenMediaMatch.blueprints import development, hashing, matching, curation, ui
-from OpenMediaMatch.utils import dev_utils
+from OpenMediaMatch.utils import dev_utils, formatters
 
 
 def _is_debug_mode():
@@ -50,6 +50,10 @@ def _is_debug_mode():
 def _is_werkzeug_reloaded_process():
     """If in debug mode, are we in the reloaded process?"""
     return os.environ.get("WERKZEUG_RUN_MAIN") == "true"
+
+
+def _is_gunicorn():
+    return "gunicorn" in os.environ.get("SERVER_SOFTWARE", "")
 
 
 def _setup_task_logging(app_logger: logging.Logger):
@@ -66,7 +70,11 @@ def create_app() -> flask.Flask:
     # We like the flask logging format, so lets have it everywhere
     root = logging.getLogger()
     if not root.handlers:
-        root.addHandler(default_handler)
+        handler = default_handler
+        if os.environ.get("LOG_FORMAT_JSON", "false") == "true":
+            formatter = formatters.CustomJsonFormatter()
+            handler.setFormatter(formatter)
+        root.addHandler(handler)
     app = flask.Flask(__name__)
 
     if "OMM_CONFIG" in os.environ:
@@ -97,6 +105,16 @@ def create_app() -> flask.Flask:
     _setup_task_logging(app.logger)
 
     scheduler: APScheduler | None = None
+
+    if _is_gunicorn() and (
+        app.config.get("ROLE_HASHER", False)
+        or app.config.get("ROLE_MATCHER", False)
+        or app.config.get("ROLE_CURATOR", False)
+    ) and (
+        app.config.get("TASK_INDEXER", False)
+        or app.config.get("TASK_FETCHER", False)
+    ):
+        raise RuntimeError("Cannot run Indexer or Fetcher tasks in gunicorn ROLE worker - must be run in separate deployments")
 
     with app.app_context():
         # We only run apscheduler in the "outer" reloader process, else we'll
