@@ -182,9 +182,9 @@ def create_app() -> flask.Flask:
         """
         Liveness/readiness check endpoint for your favourite Layer 7 load balancer
         """
-        #if app.config.get("ROLE_MATCHER", False):
-        #    if matching.index_cache_is_stale():
-        #        return f"INDEX-STALE", 503
+        if app.config.get("ROLE_MATCHER", False):
+            if matching.index_cache_is_stale():
+                return f"INDEX-STALE", 503
         return "I-AM-ALIVE", 200
 
     @app.route("/site-map")
