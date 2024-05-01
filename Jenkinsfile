@@ -71,11 +71,8 @@ pipeline {
                 script {
                     docker.withRegistry("${ECR}", "${ECR_ARN}") {
                         sh """
-                            docker ps && \
-                            docker-compose -f hasher-matcher-actioner/docker-compose.yaml down && \
-                            docker-compose -f hasher-matcher-actioner/docker-compose.yaml up -d && \
-                            docker-compose -f hasher-matcher-actioner/docker-compose.yaml exec app /bin/bash -c 'pip install pytest && pytest' && \
-                            docker-compose -f hasher-matcher-actioner/docker-compose.yaml down
+                            docker-compose -f hasher-matcher-actioner/docker-compose.yaml up db -d && \
+                            docker-compose -f hasher-matcher-actioner/docker-compose.yaml run app /bin/bash -c 'MIGRATION_COMMAND=1 flask --app OpenMediaMatch.app db upgrade --directory OpenMediaMatch/migrations && pip install pytest && pytest'
                         """
                     }
                 }
