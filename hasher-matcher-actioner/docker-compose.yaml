@@ -15,7 +15,7 @@ services:
       - 5000:5000
     environment:
       <<: *postgres-variables
-      OMM_CONFIG: /build/OpenMediaMatch/tests/omm_config.py
+      OMM_CONFIG: /build/reference_omm_configs/development_omm_config.py
     depends_on:
       - db
     networks:
