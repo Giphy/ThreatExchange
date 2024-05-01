@@ -10,7 +10,7 @@ Disables the scheduling functionality that unittests poorly, enables all roles
 PRODUCTION = False
 DBUSER = "media_match"
 DBPASS = "hunter2"
-DBHOST = "localhost"
+DBHOST = "db"
 DBNAME = "media_match_test"
 DATABASE_URI = f"postgresql+psycopg2://{DBUSER}:{DBPASS}@{DBHOST}/{DBNAME}"
 
