@@ -15,13 +15,13 @@ services:
       - 5000:5000
     environment:
       <<: *postgres-variables
-      OMM_CONFIG: /build/reference_omm_configs/development_omm_config.py
+      OMM_CONFIG: ${OMM_CONFIG:/build/reference_omm_configs/development_omm_config.py}
     depends_on:
       - db
     networks:
       - backend
     command: >
-      bash -c "MIGRATION_COMMAND=1 flask --app OpenMediaMatch.app db upgrade --directory OpenMediaMatch/migrations 
+      bash -c "MIGRATION_COMMAND=1 flask --app OpenMediaMatch.app db upgrade --directory OpenMediaMatch/migrations
       && MIGRATION_COMMAND=0 flask --app OpenMediaMatch.app run --host=0.0.0.0 --debug"
 
   db:

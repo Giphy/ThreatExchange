@@ -72,7 +72,8 @@ pipeline {
                     docker.withRegistry("${ECR}", "${ECR_ARN}") {
                         sh """
                             docker-compose -f hasher-matcher-actioner/docker-compose.yaml build
-                            docker-compose -f hasher-matcher-actioner/docker-compose.yaml run app /bin/bash -c \
+                            docker-compose -f hasher-matcher-actioner/docker-compose.yaml run \
+                                -e OMM_CONFIG=/build/reference_omm_configs/giphy_test_omm_config.py app /bin/bash -c \
                                 'MIGRATION_COMMAND=1 flask --app OpenMediaMatch.app db upgrade --directory OpenMediaMatch/migrations && \
                                 pip install pytest && pytest'
                         """
